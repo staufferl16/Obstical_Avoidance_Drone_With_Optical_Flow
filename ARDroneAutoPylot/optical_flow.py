@@ -100,6 +100,10 @@ class OpticalFlowCalculator:
 
         xvel, yvel = 0,0
 
+        lxsum, lysum = 0,0 # left-side screen x and y sums
+        rxsum, rysum = 0,0 # right-side screen x and y sums
+
+
         if self.prev_gray != None:
             # Caclulate the flow between current grayscale image
             # and previous grayscale image (self.prev_gray)
@@ -112,8 +116,26 @@ class OpticalFlowCalculator:
                     xsum += fx
                     ysum += fy
 
+                    if x <=160: # left-hand-side
+                        lxsum += abs(fx)
+                        lysum += abs(fy)
+                    else:       # right-hand-side
+                        rxsum += abs(fx)
+                        rysum += abs(fy)
+
                     cv2.line(frame2, (x,y), (int(x+fx),int(y+fy)), self.mv_color_bgr)
                     cv2.circle(frame2, (x,y), 1, self.mv_color_bgr, -1)
+                    #cv2.putText(frame2, "lx: " + str(lxsum), (50,50), cv2.FONT_HERSHEY_PLAIN, 2, 255)
+                    print("lx: " + str(lxsum) + "\t" + "rx: " + str(rxsum) + "\n")
+                    print("ly: " + str(lysum) + "\t" + "ry: " + str(rysum) + "\n")
+                    print("*" * 40)
+
+                    if lxsum > rxsum: # more movement on the left so turn right
+                        turn_magnitude = lxsum - rxsum
+                        # turn right factoring in this magnitude
+                    else:
+                        turn_magnitude = rxsum - lxsum
+                        # turn left factoring in this magnitude
 
             # Default to system time if no timestep
             curr_time = time.time()
