@@ -22,6 +22,9 @@ def action(img_bytes, img_width, img_height, is_belly, ctrl_state, vbat_flying_p
     if not hasattr(action, 'flowCalc'):
 
         action.flowCalc = OpticalFlowCalculator(640/SCALEDOWN,360/SCALEDOWN, window_name='OpticalFlow', battery = vbat_flying_percentage)
+
+	print("!"*10)
+	print(action.flowCalc.magnitude)
                 
     # Create full-color image from bytes
     image = np.frombuffer(img_bytes, np.uint8)

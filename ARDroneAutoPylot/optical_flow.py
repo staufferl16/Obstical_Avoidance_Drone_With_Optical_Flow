@@ -66,6 +66,8 @@ class OpticalFlowCalculator:
         self.prev_time = None
 
 	self.battery = battery
+	
+	self.magnitude = -1
 
     def processBytes(self, rgb_bytes, distance=None, timestep=1):
         '''
