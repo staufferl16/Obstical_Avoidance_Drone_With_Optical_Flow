@@ -11,15 +11,15 @@ optical_flow.py - Optical-flow velocity calculation and display using OpenCV
       % python optical_flow.py -s N          # scale-down factor for flow image
       % python optical_flow.py -m M          # move step in pixels
 
-    Adapted from 
- 
+    Adapted from
+
     https://code.ros.org/trac/opencv/browser/trunk/opencv/samples/python/fback.py?rev=2271
 
     Copyright (C) 2014 Simon D. Levy
 
     This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as 
-    published by the Free Software Foundation, either version 3 of the 
+    it under the terms of the GNU Lesser General Public License as
+    published by the Free Software Foundation, either version 3 of the
     License, or (at your option) any later version.
 
     This program is distributed in the hope that it will be useful,
@@ -27,6 +27,8 @@ optical_flow.py - Optical-flow velocity calculation and display using OpenCV
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 '''
+import sys
+sys.path.append('/usr/local/lib/python2.7/site-packages')
 
 import cv2
 import numpy as np
@@ -39,7 +41,7 @@ class OpticalFlowCalculator:
     '''
     A class for optical flow calculations using OpenCV
     '''
-    
+
     def __init__(self, frame_width, frame_height, scaledown=1,
                  perspective_angle=0, move_step=16, window_name=None, battery=0, flow_color_rgb=(0,255,0)):
         '''
@@ -59,7 +61,7 @@ class OpticalFlowCalculator:
         self.perspective_angle = perspective_angle
 
         self.window_name = window_name
-        
+
         self.size = (int(frame_width/scaledown), int(frame_height/scaledown))
 
         self.prev_gray = None
@@ -95,30 +97,61 @@ class OpticalFlowCalculator:
         '''
 
         frame2 = cv2.resize(frame, self.size)
- 
+
         gray = cv2.cvtColor(frame2, cv2.cv.CV_BGR2GRAY)
 
         xsum, ysum = 0,0
 
         xvel, yvel = 0,0
-        
-        if self.prev_gray != None:
 
+<<<<<<< HEAD
             flow = cv2.calcOpticalFlowFarneback(self.prev_gray, gray, pyr_scale=0.5, levels=5, winsize=13, iterations=10, poly_n=5, poly_sigma=1.1, flags=0) 
 	    #print("!"*40)
 	    #print(str(flow[3]))
             for y in range(0, flow.shape[0], self.move_step):
+=======
+        lxsum, lysum = 0,0 # left-side screen x and y sums
+        rxsum, rysum = 0,0 # right-side screen x and y sums
 
+>>>>>>> d01e95929172a086474010a34743a68bf8beae22
+
+        if self.prev_gray != None:
+            # Caclulate the flow between current grayscale image
+            # and previous grayscale image (self.prev_gray)
+            # (http://docs.opencv.org/modules/video/doc/motion_analysis_and_object_tracking.html)
+            flow = cv2.calcOpticalFlowFarneback(self.prev_gray, gray, pyr_scale=0.5, levels=5, winsize=13, iterations=10, poly_n=5, poly_sigma=1.1, flags=0)
+
+            for y in range(0, flow.shape[0], self.move_step):
                 for x in range(0, flow.shape[1], self.move_step):
-
                     fx, fy = flow[y, x]
                     xsum += fx
                     ysum += fy
 
+                    if x <=160: # left-hand-side
+                        lxsum += abs(fx)
+                        lysum += abs(fy)
+                    else:       # right-hand-side
+                        rxsum += abs(fx)
+                        rysum += abs(fy)
+
                     cv2.line(frame2, (x,y), (int(x+fx),int(y+fy)), self.mv_color_bgr)
                     cv2.circle(frame2, (x,y), 1, self.mv_color_bgr, -1)
+<<<<<<< HEAD
 		    
 		    cv2.putText(frame2, "Battery: " + str(self.battery), (50,50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,128,255), 2)
+=======
+                    #cv2.putText(frame2, "lx: " + str(lxsum), (50,50), cv2.FONT_HERSHEY_PLAIN, 2, 255)
+                    print("lx: " + str(lxsum) + "\t" + "rx: " + str(rxsum) + "\n")
+                    print("ly: " + str(lysum) + "\t" + "ry: " + str(rysum) + "\n")
+                    print("*" * 40)
+
+                    if lxsum > rxsum: # more movement on the left so turn right
+                        turn_magnitude = lxsum - rxsum
+                        # turn right factoring in this magnitude
+                    else:
+                        turn_magnitude = rxsum - lxsum
+                        # turn left factoring in this magnitude
+>>>>>>> d01e95929172a086474010a34743a68bf8beae22
 
             # Default to system time if no timestep
             curr_time = time.time()
@@ -135,7 +168,7 @@ class OpticalFlowCalculator:
             cv2.imshow(self.window_name, frame2)
             if cv2.waitKey(1) & 0x000000FF== 27: # ESC
                 return None
-        
+
        # Normalize and divide by timestep
         return  xvel, yvel
 
@@ -151,10 +184,10 @@ class OpticalFlowCalculator:
 
     def _velocity_meters_per_second(self, velocity_pixels_per_second, dimsize_pixels, distance_meters):
 
-        distance_pixels = (dimsize_pixels/2) / math.tan(self.perspective_angle/2)         
+        distance_pixels = (dimsize_pixels/2) / math.tan(self.perspective_angle/2)
 
         pixels_per_meter = distance_pixels / distance_meters
-         
+
         return velocity_pixels_per_second / pixels_per_meter
 
 if __name__=="__main__":
@@ -179,7 +212,7 @@ if __name__=="__main__":
 
     movestep = int(options.movestep) if options.movestep else 16
 
-    flow = OpticalFlowCalculator(width, height, window_name='Optical Flow', scaledown=scaledown, move_step=movestep) 
+    flow = OpticalFlowCalculator(width, height, window_name='Optical Flow', scaledown=scaledown, move_step=movestep)
 
     start_sec = time.time()
     count = 0
@@ -188,7 +221,7 @@ if __name__=="__main__":
         success, frame = cap.read()
 
         count += 1
-            
+
         if not success:
             break
 
@@ -199,5 +232,5 @@ if __name__=="__main__":
 
     elapsed_sec = time.time() - start_sec
 
-    print('%dx%d image: %d frames in %3.3f sec = %3.3f frames / sec' % 
+    print('%dx%d image: %d frames in %3.3f sec = %3.3f frames / sec' %
              (width/scaledown, height/scaledown, count, elapsed_sec, count/elapsed_sec))
