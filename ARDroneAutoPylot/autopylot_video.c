@@ -105,6 +105,10 @@ C_RESULT video_transform (video_cfg_t *cfg, vp_api_io_data_t *in, vp_api_io_data
 
 	if (g_autopilot) {
 
+                printf("%f %f %f %f\n", 
+                    commands.phi, commands.theta, commands.gaz, commands.yaw);
+                fflush(stdout);
+
 	        set(commands.phi, commands.theta, commands.gaz, commands.yaw);
 
 		if (commands.zap) {

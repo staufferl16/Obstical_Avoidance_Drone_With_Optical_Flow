@@ -41,7 +41,7 @@ class OpticalFlowCalculator:
     '''
     
     def __init__(self, frame_width, frame_height, scaledown=1,
-                 perspective_angle=0, move_step=16, window_name=None, battery=0, flow_color_rgb=(0,255,0)):
+                 perspective_angle=0, move_step=16, window_name=None, battery, flow_color_rgb=(0,255,0)):
         '''
         Creates an OpticalFlow object for images with specified width and height.
 
